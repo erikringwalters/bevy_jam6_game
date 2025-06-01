@@ -58,6 +58,7 @@ fn draw_cursor(
     );
 }
 
+#[hot]
 fn handle_click(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

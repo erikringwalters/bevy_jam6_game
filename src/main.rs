@@ -4,7 +4,7 @@ mod floor;
 
 use crate::cursor::*;
 use crate::environment::*;
-use bevy_simple_subsecond_system::{SimpleSubsecondPlugin, hot};
+use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
 
 use bevy::prelude::*;
 

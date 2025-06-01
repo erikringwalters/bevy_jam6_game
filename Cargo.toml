@@ -7,3 +7,15 @@ edition = "2024"
 bevy = "0.16.1"
 bevy_rapier3d = "0.30.0"
 bevy_simple_subsecond_system = { git = "https://github.com/TheBevyFlock/bevy_simple_subsecond_system", version = "0.2" }
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
