@@ -11,7 +11,7 @@ pub struct CursorPlugin;
 impl Plugin for CursorPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Cursor::default())
-            .add_systems(Update, (draw_cursor, handle_click));
+            .add_systems(Update, (draw_cursor));
     }
 }
 
@@ -53,24 +53,7 @@ fn draw_cursor(
             cursor.position + floor.up() * 0.01,
             Quat::from_rotation_arc(Vec3::Z, floor.up().as_vec3()),
         ),
-        0.2,
+        0.75,
         Color::WHITE,
     );
-}
-
-#[hot]
-fn handle_click(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mouse_button_input: Res<ButtonInput<MouseButton>>,
-    cursor: Res<Cursor>,
-) {
-    if mouse_button_input.just_pressed(MouseButton::Left) {
-        commands.spawn((
-            Mesh3d(meshes.add(Sphere { radius: 1.0 })),
-            MeshMaterial3d(materials.add(Color::from(css::MINT_CREAM))),
-            Transform::from_translation(cursor.position),
-        ));
-    }
 }
