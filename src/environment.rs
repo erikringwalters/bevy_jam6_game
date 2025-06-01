@@ -1,10 +1,10 @@
+use crate::floor::Floor;
 use bevy::{
     asset::RenderAssetUsages,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 use bevy_rapier3d::prelude::*;
-
 pub struct EnvironmentPlugin;
 
 impl Plugin for EnvironmentPlugin {
@@ -12,9 +12,6 @@ impl Plugin for EnvironmentPlugin {
         app.add_systems(Startup, setup);
     }
 }
-
-#[derive(Component)]
-pub struct Floor;
 
 fn setup(
     mut commands: Commands,
@@ -71,7 +68,7 @@ fn setup(
         Collider::cuboid(floor_half_size.x, floor_half_size.y, floor_half_size.z),
         Mesh3d(meshes.add(Cuboid::new(floor_size.x, floor_size.y, floor_size.z))),
         MeshMaterial3d(debug_material.clone()),
-        Transform::from_xyz(0., 0.0, 0.),
+        Transform::from_xyz(0., 0., 0.),
         Friction::new(1.),
         Restitution::new(0.1),
     ));
