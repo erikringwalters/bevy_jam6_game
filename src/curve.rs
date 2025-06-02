@@ -1,5 +1,5 @@
 use crate::cursor::Cursor;
-use bevy::prelude::*;
+use bevy::{color::palettes::css, prelude::*};
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Component, Resource, Clone, Default)]
@@ -21,7 +21,12 @@ impl Plugin for CurvePlugin {
             .add_systems(Startup, setup_curve)
             .add_systems(
                 Update,
-                (handle_click, handle_undo, update_curve, draw_curve).chain(),
+                (
+                    handle_click,
+                    handle_undo,
+                    update_curve,
+                    // draw_curve,
+                ),
             );
     }
 }
@@ -91,23 +96,28 @@ fn handle_click(
     mut control_points: ResMut<ControlPoints>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
+        let mut pos = cursor.position;
+        pos.y = 1.6;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
-            control_points.points[0] = cursor.position;
+            control_points.points[0] = pos;
             commands.spawn((
                 Mesh3d(meshes.add(Sphere { radius: 0.25 })),
                 MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 1.0))),
-                Transform::from_translation(cursor.position),
+                Transform::from_translation(pos),
             ));
         } else {
-            control_points.points.push(cursor.position);
+            control_points.points.push(pos);
         }
     }
 }
 
 #[hot]
 fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<ControlPoints>) {
-    if keyboard.just_pressed(KeyCode::KeyR) {
+    if keyboard.just_pressed(KeyCode::KeyR) || keyboard.just_pressed(KeyCode::KeyZ) {
         control_points.points.pop();
+    }
+    if keyboard.just_pressed(KeyCode::KeyC) {
+        control_points.points.clear();
     }
 }
 
@@ -144,7 +154,7 @@ fn spawn_markers(
                 commands.spawn((
                     Name::new("Domino Marker"),
                     Mesh3d(meshes.add(Cuboid::new(1.0, 2.0, 0.2))),
-                    MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 1.0))),
+                    MeshMaterial3d(materials.add(Color::from(css::GHOST_WHITE))),
                     DominoMarker,
                     Transform::from_translation(pos).looking_at(last_pos, Dir3::Y),
                 ));
