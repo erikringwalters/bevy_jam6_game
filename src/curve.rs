@@ -2,7 +2,7 @@ use crate::cursor::Cursor;
 use bevy::prelude::*;
 use bevy_simple_subsecond_system::hot;
 
-#[derive(Resource, Clone, Default)]
+#[derive(Component, Resource, Clone, Default)]
 struct Curve(Option<CubicCurve<Vec3>>);
 
 #[derive(Resource, Clone)]
@@ -37,12 +37,19 @@ fn setup_curve(mut commands: Commands) {
 }
 
 #[hot]
-fn update_curve(control_points: Res<ControlPoints>, mut curve: ResMut<Curve>) {
+fn update_curve(
+    commands: Commands,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<StandardMaterial>>,
+    control_points: ResMut<ControlPoints>,
+    mut curve: ResMut<Curve>,
+) {
     if !control_points.is_changed() {
         return;
     }
 
     *curve = form_curve(&control_points);
+    spawn_along_curve(commands, meshes, materials, curve.into());
 }
 
 /// This system uses gizmos to draw the current [`Curve`] by breaking it up into a large number
@@ -54,10 +61,10 @@ fn draw_curve(curve: Res<Curve>, mut gizmos: Gizmos) {
     };
     // Scale resolution with curve length so it doesn't degrade as the length increases.
     let resolution = 100 * curve.segments().len();
-    // println!("{:?}", curve.segments());
+    println!("{:?}\n", curve.segments());
     gizmos.linestrip(
         curve.iter_positions(resolution).map(|pt| pt),
-        Color::srgba(1.0, 1.0, 1.0, 0.2),
+        Color::srgba(1.0, 1.0, 1.0, 1.0),
     );
 }
 
@@ -73,6 +80,7 @@ fn handle_click(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    curve: ResMut<Curve>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     cursor: Res<Cursor>,
     mut control_points: ResMut<ControlPoints>,
@@ -82,7 +90,7 @@ fn handle_click(
             control_points.points[0] = cursor.position;
             commands.spawn((
                 Mesh3d(meshes.add(Sphere { radius: 0.25 })),
-                MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 0.5))),
+                MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 1.0))),
                 Transform::from_translation(cursor.position),
             ));
         } else {
@@ -95,5 +103,44 @@ fn handle_click(
 fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<ControlPoints>) {
     if keyboard.just_pressed(KeyCode::KeyR) {
         control_points.points.pop();
+    }
+}
+
+fn spawn_along_curve(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    curve: Res<Curve>,
+) {
+    let Some(ref curve) = curve.0 else {
+        return;
+    };
+
+    let spacing = 1.0;
+    let resolution = 100;
+
+    for segment in curve.segments() {
+        let mut last_pos = segment.position(0.0);
+        let mut dist_accum = 0.0;
+        let mut next_dist = spacing;
+
+        for i in 1..=resolution {
+            let t = i as f32 / resolution as f32;
+            let pos = segment.position(t);
+            let step = pos.distance(last_pos);
+            dist_accum += step;
+
+            if dist_accum >= next_dist {
+                commands.spawn((
+                    Name::new("Curve Marker"),
+                    Mesh3d(meshes.add(Cuboid::new(1.0, 2.0, 0.2))),
+                    MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 1.0))),
+                    Transform::from_translation(pos),
+                ));
+                next_dist += spacing;
+            }
+
+            last_pos = pos;
+        }
     }
 }
