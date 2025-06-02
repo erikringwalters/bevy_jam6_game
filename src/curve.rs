@@ -16,7 +16,10 @@ impl Plugin for CurvePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Curve::default())
             .add_systems(Startup, setup_curve)
-            .add_systems(Update, (update_curve, draw_curve, handle_click));
+            .add_systems(
+                Update,
+                (handle_click, handle_undo, update_curve, draw_curve).chain(),
+            );
     }
 }
 
@@ -75,16 +78,22 @@ fn handle_click(
     mut control_points: ResMut<ControlPoints>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
-        commands.spawn((
-            Mesh3d(meshes.add(Sphere { radius: 0.25 })),
-            MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 0.5))),
-            Transform::from_translation(cursor.position),
-        ));
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
             control_points.points[0] = cursor.position;
+            commands.spawn((
+                Mesh3d(meshes.add(Sphere { radius: 0.25 })),
+                MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 0.5))),
+                Transform::from_translation(cursor.position),
+            ));
         } else {
             control_points.points.push(cursor.position);
-            println!("{:?}", control_points.points.len())
         }
+    }
+}
+
+#[hot]
+fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<ControlPoints>) {
+    if keyboard.just_pressed(KeyCode::KeyR) {
+        control_points.points.pop();
     }
 }
