@@ -1,5 +1,5 @@
 use crate::cursor::Cursor;
-use bevy::prelude::*;
+use bevy::{ecs::system::entity_command::despawn, prelude::*};
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Component, Resource, Clone, Default)]
@@ -9,6 +9,9 @@ struct Curve(Option<CubicCurve<Vec3>>);
 struct ControlPoints {
     points: Vec<Vec3>,
 }
+
+#[derive(Component)]
+struct DominoMarker;
 
 pub struct CurvePlugin;
 
@@ -38,18 +41,21 @@ fn setup_curve(mut commands: Commands) {
 
 #[hot]
 fn update_curve(
-    commands: Commands,
+    commands1: Commands,
+    commands2: Commands,
     meshes: ResMut<Assets<Mesh>>,
     materials: ResMut<Assets<StandardMaterial>>,
     control_points: ResMut<ControlPoints>,
     mut curve: ResMut<Curve>,
+    query: Query<Entity, With<DominoMarker>>,
 ) {
     if !control_points.is_changed() {
         return;
     }
 
     *curve = form_curve(&control_points);
-    spawn_along_curve(commands, meshes, materials, curve.into());
+    despawn_markers(commands1, query);
+    spawn_markers(commands2, meshes, materials, curve.into());
 }
 
 /// This system uses gizmos to draw the current [`Curve`] by breaking it up into a large number
@@ -61,7 +67,7 @@ fn draw_curve(curve: Res<Curve>, mut gizmos: Gizmos) {
     };
     // Scale resolution with curve length so it doesn't degrade as the length increases.
     let resolution = 100 * curve.segments().len();
-    println!("{:?}\n", curve.segments());
+    // println!("{:?}\n", curve.segments());
     gizmos.linestrip(
         curve.iter_positions(resolution).map(|pt| pt),
         Color::srgba(1.0, 1.0, 1.0, 1.0),
@@ -80,7 +86,6 @@ fn handle_click(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    curve: ResMut<Curve>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     cursor: Res<Cursor>,
     mut control_points: ResMut<ControlPoints>,
@@ -106,7 +111,8 @@ fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<C
     }
 }
 
-fn spawn_along_curve(
+#[hot]
+fn spawn_markers(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -132,9 +138,10 @@ fn spawn_along_curve(
 
             if dist_accum >= next_dist {
                 commands.spawn((
-                    Name::new("Curve Marker"),
+                    Name::new("Domino Marker"),
                     Mesh3d(meshes.add(Cuboid::new(1.0, 2.0, 0.2))),
                     MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 1.0))),
+                    DominoMarker,
                     Transform::from_translation(pos),
                 ));
                 next_dist += spacing;
@@ -142,5 +149,11 @@ fn spawn_along_curve(
 
             last_pos = pos;
         }
+    }
+}
+
+fn despawn_markers(mut commands: Commands, mut query: Query<Entity, With<DominoMarker>>) {
+    for entity in query.iter_mut() {
+        &commands.entity(entity).despawn();
     }
 }
