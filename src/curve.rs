@@ -1,5 +1,5 @@
 use crate::cursor::Cursor;
-use bevy::{ecs::system::entity_command::despawn, prelude::*};
+use bevy::prelude::*;
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Component, Resource, Clone, Default)]
@@ -123,16 +123,20 @@ fn spawn_markers(
     };
 
     let spacing = 1.0;
-    let resolution = 100;
+    let resolution = 1000;
+    let mut last_pos = Vec3::ZERO;
+    let mut pos: Vec3;
 
     for segment in curve.segments() {
-        let mut last_pos = segment.position(0.0);
+        if last_pos == Vec3::ZERO {
+            last_pos = segment.position(0.0);
+        }
         let mut dist_accum = 0.0;
         let mut next_dist = spacing;
 
         for i in 1..=resolution {
             let t = i as f32 / resolution as f32;
-            let pos = segment.position(t);
+            pos = segment.position(t);
             let step = pos.distance(last_pos);
             dist_accum += step;
 
@@ -142,7 +146,7 @@ fn spawn_markers(
                     Mesh3d(meshes.add(Cuboid::new(1.0, 2.0, 0.2))),
                     MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 1.0))),
                     DominoMarker,
-                    Transform::from_translation(pos),
+                    Transform::from_translation(pos).looking_at(last_pos, Dir3::Y),
                 ));
                 next_dist += spacing;
             }
@@ -154,6 +158,6 @@ fn spawn_markers(
 
 fn despawn_markers(mut commands: Commands, mut query: Query<Entity, With<DominoMarker>>) {
     for entity in query.iter_mut() {
-        &commands.entity(entity).despawn();
+        commands.entity(entity).despawn();
     }
 }
