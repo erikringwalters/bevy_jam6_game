@@ -31,6 +31,7 @@ impl Plugin for CurvePlugin {
     }
 }
 
+#[hot]
 fn setup_curve(mut commands: Commands) {
     // Starting data for [`ControlPoints`]:
     let default_points = vec![Vec3::ZERO];
@@ -46,8 +47,7 @@ fn setup_curve(mut commands: Commands) {
 
 #[hot]
 fn update_curve(
-    commands1: Commands,
-    commands2: Commands,
+    mut commands: Commands,
     meshes: ResMut<Assets<Mesh>>,
     materials: ResMut<Assets<StandardMaterial>>,
     control_points: ResMut<ControlPoints>,
@@ -59,12 +59,10 @@ fn update_curve(
     }
 
     *curve = form_curve(&control_points);
-    despawn_markers(commands1, query);
-    spawn_markers(commands2, meshes, materials, curve.into());
+    despawn_markers(&mut commands, query);
+    spawn_markers(&mut commands, meshes, materials, curve.into());
 }
 
-/// This system uses gizmos to draw the current [`Curve`] by breaking it up into a large number
-/// of line segments.
 #[hot]
 fn draw_curve(curve: Res<Curve>, mut gizmos: Gizmos) {
     let Some(ref curve) = curve.0 else {
@@ -123,7 +121,7 @@ fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<C
 
 #[hot]
 fn spawn_markers(
-    mut commands: Commands,
+    commands: &mut Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     curve: Res<Curve>,
@@ -166,7 +164,8 @@ fn spawn_markers(
     }
 }
 
-fn despawn_markers(mut commands: Commands, mut query: Query<Entity, With<DominoMarker>>) {
+#[hot]
+fn despawn_markers(commands: &mut Commands, mut query: Query<Entity, With<DominoMarker>>) {
     for entity in query.iter_mut() {
         commands.entity(entity).despawn();
     }
