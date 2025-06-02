@@ -1,5 +1,5 @@
 use crate::floor::Floor;
-use bevy::{color::palettes::css, prelude::*};
+use bevy::prelude::*;
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Resource, Default)]
@@ -11,7 +11,7 @@ pub struct CursorPlugin;
 impl Plugin for CursorPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Cursor::default())
-            .add_systems(Update, (draw_cursor));
+            .add_systems(Update, draw_cursor);
     }
 }
 

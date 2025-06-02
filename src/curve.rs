@@ -1,5 +1,5 @@
 use crate::cursor::Cursor;
-use bevy::{color::palettes::css, prelude::*};
+use bevy::prelude::*;
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Resource, Clone, Default)]
@@ -22,7 +22,7 @@ impl Plugin for CurvePlugin {
 
 fn setup_curve(mut commands: Commands) {
     // Starting data for [`ControlPoints`]:
-    let default_points = vec![vec3(0., 0., 0.)];
+    let default_points = vec![Vec3::ZERO];
 
     let default_control_data = ControlPoints {
         points: default_points.into_iter().collect(),
@@ -44,16 +44,17 @@ fn update_curve(control_points: Res<ControlPoints>, mut curve: ResMut<Curve>) {
 
 /// This system uses gizmos to draw the current [`Curve`] by breaking it up into a large number
 /// of line segments.
+#[hot]
 fn draw_curve(curve: Res<Curve>, mut gizmos: Gizmos) {
     let Some(ref curve) = curve.0 else {
         return;
     };
     // Scale resolution with curve length so it doesn't degrade as the length increases.
     let resolution = 100 * curve.segments().len();
-    println!("{:?}", curve.segments());
+    // println!("{:?}", curve.segments());
     gizmos.linestrip(
         curve.iter_positions(resolution).map(|pt| pt),
-        Color::srgb(1.0, 1.0, 1.0),
+        Color::srgba(1.0, 1.0, 1.0, 0.2),
     );
 }
 
@@ -75,10 +76,15 @@ fn handle_click(
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
         commands.spawn((
-            Mesh3d(meshes.add(Sphere { radius: 0.4 })),
-            MeshMaterial3d(materials.add(Color::from(css::DARK_SEA_GREEN))),
+            Mesh3d(meshes.add(Sphere { radius: 0.25 })),
+            MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 0.5))),
             Transform::from_translation(cursor.position),
         ));
-        control_points.points.push(cursor.position);
+        if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
+            control_points.points[0] = cursor.position;
+        } else {
+            control_points.points.push(cursor.position);
+            println!("{:?}", control_points.points.len())
+        }
     }
 }
