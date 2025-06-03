@@ -14,18 +14,18 @@ pub struct Domino;
 #[derive(Component)]
 pub struct DominoMarker;
 
-pub struct DominoMarkerPlugin;
+// pub struct DominoMarkerPlugin;
 
-impl Plugin for DominoMarkerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Update, check_marker_validity);
-    }
-}
-fn check_marker_validity(
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut material_handles: Query<&MeshMaterial3d<StandardMaterial>, With<DominoMarker>>,
-) {
-    // for mut marker_material in query.iter() {
-    //     marker_material.add(Color::srgba(0.1, 0.75, 0.1, 0.8))
-    // }
-}
+// impl Plugin for DominoMarkerPlugin {
+//     fn build(&self, app: &mut App) {
+//         app.add_systems(Update, check_marker_validity);
+//     }
+// }
+// fn check_marker_validity(
+//     mut materials: ResMut<Assets<StandardMaterial>>,
+//     mut material_handles: Query<&MeshMaterial3d<StandardMaterial>, With<DominoMarker>>,
+// ) {
+//     for mut marker_material in query.iter() {
+//         marker_material.add(Color::srgba(0.1, 0.75, 0.1, 0.8))
+//     }
+// }

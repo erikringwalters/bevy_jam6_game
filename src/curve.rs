@@ -1,6 +1,6 @@
 use crate::cursor::Cursor;
 use crate::domino::{self, Domino, DominoMarker};
-use bevy::{color::palettes::css, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use bevy_simple_subsecond_system::hot;
 
@@ -59,7 +59,7 @@ fn update_curve(
     }
 
     *curve = form_curve(&control_points);
-    despawn_markers(&mut commands, query);
+    despawn_entities(&mut commands, query);
     spawn_markers(&mut commands, meshes, materials, curve.into());
 }
 
@@ -203,7 +203,7 @@ fn spawn_markers(
 }
 
 #[hot]
-fn despawn_markers(commands: &mut Commands, mut query: Query<Entity, With<DominoMarker>>) {
+fn despawn_entities<T: Component>(commands: &mut Commands, mut query: Query<Entity, With<T>>) {
     for marker in query.iter_mut() {
         commands.entity(marker).despawn();
     }
