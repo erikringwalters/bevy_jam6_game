@@ -65,6 +65,7 @@ fn setup_environment(
         Name::new("Floor"),
         Floor,
         RigidBody::Fixed,
+        Ccd::enabled(),
         Collider::cuboid(floor_half_size.x, floor_half_size.y, floor_half_size.z),
         Mesh3d(meshes.add(Cuboid::new(floor_size.x, floor_size.y, floor_size.z))),
         MeshMaterial3d(debug_material.clone()),

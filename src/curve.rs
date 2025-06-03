@@ -1,5 +1,7 @@
 use crate::cursor::Cursor;
+use crate::domino::{self, Domino, DominoMarker};
 use bevy::{color::palettes::css, prelude::*};
+use bevy_rapier3d::prelude::*;
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Component, Resource, Clone, Default)]
@@ -9,9 +11,6 @@ struct Curve(Option<CubicCurve<Vec3>>);
 struct ControlPoints {
     points: Vec<Vec3>,
 }
-
-#[derive(Component)]
-struct DominoMarker;
 
 pub struct CurvePlugin;
 
@@ -24,6 +23,7 @@ impl Plugin for CurvePlugin {
                 (
                     handle_click,
                     handle_undo,
+                    handle_start_sim,
                     update_curve,
                     // draw_curve,
                 ),
@@ -95,7 +95,7 @@ fn handle_click(
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
         let mut pos = cursor.position;
-        pos.y = 1.6;
+        pos.y = 1.7;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
             control_points.points[0] = pos;
             commands.spawn((
@@ -120,6 +120,38 @@ fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<C
 }
 
 #[hot]
+fn handle_start_sim(
+    mut commands: Commands,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(Entity, &Transform), With<DominoMarker>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if keyboard.just_pressed(KeyCode::Space) {
+        println!("space pressed");
+        for (marker, transform) in query.iter_mut() {
+            println!("{:?} ", marker);
+            let pos = transform.translation;
+            let rot = transform.rotation;
+            commands.entity(marker).despawn();
+            commands.spawn((
+                Name::new("Domino"),
+                Domino,
+                RigidBody::Dynamic,
+                Collider::cuboid(
+                    domino::DOMINO_HALF_SIZE.x,
+                    domino::DOMINO_HALF_SIZE.y,
+                    domino::DOMINO_HALF_SIZE.z,
+                ),
+                Mesh3d(meshes.add(Cuboid::from_size(domino::DOMINO_SIZE))),
+                MeshMaterial3d(materials.add(Color::WHITE)),
+                Transform::from_translation(pos).with_rotation(rot), //set rotation,
+            ));
+        }
+    }
+}
+
+#[hot]
 fn spawn_markers(
     commands: &mut Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -130,7 +162,7 @@ fn spawn_markers(
         return;
     };
 
-    let spacing = 1.0;
+    let spacing = domino::DOMINO_DISTANCE;
     let resolution = 1000;
     let mut last_pos = Vec3::ZERO;
     let mut pos: Vec3;
@@ -151,9 +183,15 @@ fn spawn_markers(
             if dist_accum >= next_dist {
                 commands.spawn((
                     Name::new("Domino Marker"),
-                    Mesh3d(meshes.add(Cuboid::new(1.0, 2.0, 0.2))),
-                    MeshMaterial3d(materials.add(Color::from(css::GHOST_WHITE))),
                     DominoMarker,
+                    Collider::cuboid(
+                        domino::DOMINO_HALF_SIZE.x,
+                        domino::DOMINO_HALF_SIZE.y,
+                        domino::DOMINO_HALF_SIZE.z,
+                    ),
+                    Sensor,
+                    Mesh3d(meshes.add(Cuboid::from_size(domino::DOMINO_SIZE))),
+                    MeshMaterial3d(materials.add(Color::srgba(0.2, 0.8, 0.2, 0.9))),
                     Transform::from_translation(pos).looking_at(last_pos, Dir3::Y),
                 ));
                 next_dist += spacing;
@@ -166,7 +204,7 @@ fn spawn_markers(
 
 #[hot]
 fn despawn_markers(commands: &mut Commands, mut query: Query<Entity, With<DominoMarker>>) {
-    for entity in query.iter_mut() {
-        commands.entity(entity).despawn();
+    for marker in query.iter_mut() {
+        commands.entity(marker).despawn();
     }
 }
