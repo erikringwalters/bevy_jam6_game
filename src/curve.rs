@@ -227,19 +227,19 @@ fn spawn_markers(
     let resolution = 1000;
     let mut last_pos = Vec3::ZERO;
     let mut pos: Vec3;
+    let mut dist_accum = 0.0;
+    let mut next_dist = spacing;
 
     for segment in curve.segments() {
         if last_pos == Vec3::ZERO {
             last_pos = segment.position(0.0);
         }
-        let mut dist_accum = 0.0;
-        let mut next_dist = spacing;
-
         for i in 1..=resolution {
             let t = i as f32 / resolution as f32;
             pos = segment.position(t);
             let step = pos.distance(last_pos);
             dist_accum += step;
+            if step > spacing {}
 
             if dist_accum >= next_dist {
                 commands.spawn((
