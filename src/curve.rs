@@ -92,8 +92,10 @@ fn handle_click(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     cursor: Res<Cursor>,
     mut control_points: ResMut<ControlPoints>,
+    query: Query<Entity, With<Domino>>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
+        despawn_entities(&mut commands, query);
         let mut pos = cursor.position;
         pos.y = 1.7;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
