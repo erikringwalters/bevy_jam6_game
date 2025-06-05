@@ -191,9 +191,9 @@ fn animate_bump(
     mut pusher_transform: Single<&mut Transform, With<Pusher>>,
     time: Res<Time>,
 ) {
-    println!("{:?}", sim.state);
+    // println!("{:?}", sim.state);
     if sim.state == SimulationState::Physics {
-        let distance = DOMINO_DISTANCE * 1.25;
+        let distance = DOMINO_DISTANCE * 1.75;
         let toward = if control_points.points.len() > 1 {
             control_points.points[1]
         } else {
@@ -207,7 +207,7 @@ fn animate_bump(
         {
             pusher_transform
                 .translation
-                .smooth_nudge(&toward, 0.25, time.delta_secs());
+                .smooth_nudge(&toward, 0.04, time.delta_secs());
         }
     }
 }
@@ -257,7 +257,6 @@ fn spawn_markers(
                 ));
                 next_dist += spacing;
             }
-
             last_pos = pos;
         }
     }

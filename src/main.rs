@@ -4,6 +4,7 @@ mod domino;
 mod environment;
 mod floor;
 mod pusher;
+mod ui;
 
 use crate::cursor::*;
 use crate::curve::*;
@@ -12,6 +13,7 @@ use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+use ui::UIPlugin;
 
 fn main() {
     App::new()
@@ -21,5 +23,6 @@ fn main() {
         .add_plugins(EnvironmentPlugin)
         .add_plugins(CursorPlugin)
         .add_plugins(CurvePlugin)
+        .add_plugins(UIPlugin)
         .run();
 }
