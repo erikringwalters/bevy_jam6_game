@@ -1,8 +1,21 @@
 use crate::cursor::Cursor;
-use crate::domino::{self, Domino, DominoMarker};
+use crate::domino::{self, DOMINO_DISTANCE, Domino, DominoMarker};
+use crate::pusher::{self, Pusher};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use bevy_simple_subsecond_system::hot;
+
+#[derive(Default, PartialEq, Debug)]
+pub enum SimulationState {
+    #[default]
+    Draw,
+    Physics,
+}
+
+#[derive(Resource, Default, Debug)]
+pub struct CurrentSimulation {
+    state: SimulationState,
+}
 
 #[derive(Component, Resource, Clone, Default)]
 struct Curve(Option<CubicCurve<Vec3>>);
@@ -17,7 +30,9 @@ pub struct CurvePlugin;
 impl Plugin for CurvePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Curve::default())
+            .insert_resource(CurrentSimulation::default())
             .add_systems(Startup, setup_curve)
+            .add_systems(FixedPreUpdate, animate_bump)
             .add_systems(
                 Update,
                 (
@@ -87,6 +102,7 @@ fn form_curve(control_points: &ControlPoints) -> Curve {
 #[hot]
 fn handle_click(
     mut commands: Commands,
+    mut sim: ResMut<CurrentSimulation>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
@@ -95,13 +111,19 @@ fn handle_click(
     query: Query<Entity, With<Domino>>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
+        sim.state = SimulationState::Draw;
         despawn_entities(&mut commands, query);
         let mut pos = cursor.position;
         pos.y = 1.7;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
             control_points.points[0] = pos;
             commands.spawn((
-                Mesh3d(meshes.add(Sphere { radius: 0.25 })),
+                Pusher,
+                RigidBody::Fixed,
+                Collider::ball(pusher::RADIUS),
+                Mesh3d(meshes.add(Sphere {
+                    radius: pusher::RADIUS,
+                })),
                 MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 1.0))),
                 Transform::from_translation(pos),
             ));
@@ -112,32 +134,40 @@ fn handle_click(
 }
 
 #[hot]
-fn handle_undo(keyboard: Res<ButtonInput<KeyCode>>, mut control_points: ResMut<ControlPoints>) {
+fn handle_undo(
+    mut commands: Commands,
+    mut sim: ResMut<CurrentSimulation>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut control_points: ResMut<ControlPoints>,
+    query: Query<Entity, With<Domino>>,
+) {
     if keyboard.just_pressed(KeyCode::KeyR) || keyboard.just_pressed(KeyCode::KeyZ) {
+        despawn_entities(&mut commands, query);
         control_points.points.pop();
+        sim.state = SimulationState::Draw;
     }
     if keyboard.just_pressed(KeyCode::KeyC) {
+        despawn_entities(&mut commands, query);
         control_points.points.clear();
+        sim.state = SimulationState::Draw;
     }
 }
 
 #[hot]
 fn handle_start_sim(
     mut commands: Commands,
+    mut sim: ResMut<CurrentSimulation>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<(Entity, &Transform), With<DominoMarker>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     if keyboard.just_pressed(KeyCode::Space) {
-        println!("space pressed");
         for (marker, transform) in query.iter_mut() {
-            println!("{:?} ", marker);
             let pos = transform.translation;
             let rot = transform.rotation;
             commands.entity(marker).despawn();
             commands.spawn((
-                Name::new("Domino"),
                 Domino,
                 RigidBody::Dynamic,
                 Collider::cuboid(
@@ -147,8 +177,37 @@ fn handle_start_sim(
                 ),
                 Mesh3d(meshes.add(Cuboid::from_size(domino::DOMINO_SIZE))),
                 MeshMaterial3d(materials.add(Color::WHITE)),
-                Transform::from_translation(pos).with_rotation(rot), //set rotation,
+                Transform::from_translation(pos).with_rotation(rot),
             ));
+        }
+        sim.state = SimulationState::Physics;
+    }
+}
+
+#[hot]
+fn animate_bump(
+    control_points: Res<ControlPoints>,
+    sim: ResMut<CurrentSimulation>,
+    mut pusher_transform: Single<&mut Transform, With<Pusher>>,
+    time: Res<Time>,
+) {
+    println!("{:?}", sim.state);
+    if sim.state == SimulationState::Physics {
+        let distance = DOMINO_DISTANCE * 1.25;
+        let toward = if control_points.points.len() > 1 {
+            control_points.points[1]
+        } else {
+            pusher_transform.translation
+        };
+
+        if pusher_transform
+            .translation
+            .distance(control_points.points[0])
+            < distance
+        {
+            pusher_transform
+                .translation
+                .smooth_nudge(&toward, 0.25, time.delta_secs());
         }
     }
 }

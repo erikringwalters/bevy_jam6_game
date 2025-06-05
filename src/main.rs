@@ -3,6 +3,7 @@ mod curve;
 mod domino;
 mod environment;
 mod floor;
+mod pusher;
 
 use crate::cursor::*;
 use crate::curve::*;
