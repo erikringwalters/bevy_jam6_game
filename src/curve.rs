@@ -1,5 +1,6 @@
 use crate::cursor::Cursor;
 use crate::domino::{self, DOMINO_DISTANCE, Domino, DominoMarker};
+use crate::environment;
 use crate::pusher::Pusher;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -111,7 +112,6 @@ fn handle_click(
         pos.y = 1.7;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
             control_points.points[0] = pos;
-            // TODO: move pusher to pos
         } else {
             control_points.points.push(pos);
         }
@@ -129,11 +129,15 @@ fn handle_undo(
     if keyboard.just_pressed(KeyCode::KeyR) || keyboard.just_pressed(KeyCode::KeyZ) {
         despawn_entities(&mut commands, query);
         control_points.points.pop();
+        if control_points.points.is_empty() {
+            control_points.points.push(environment::PUSHER_START_POS);
+        }
         sim.state = SimulationState::Draw;
     }
     if keyboard.just_pressed(KeyCode::KeyC) {
         despawn_entities(&mut commands, query);
         control_points.points.clear();
+        control_points.points.push(environment::PUSHER_START_POS);
         sim.state = SimulationState::Draw;
     }
 }
@@ -144,7 +148,6 @@ fn handle_start_sim(
     mut sim: ResMut<CurrentSimulation>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<(Entity, &Transform), With<DominoMarker>>,
-    // mut transform: Single<&mut Transform, With<Pusher>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
