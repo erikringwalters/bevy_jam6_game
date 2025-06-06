@@ -1,6 +1,6 @@
 use crate::cursor::Cursor;
 use crate::domino::{self, DOMINO_DISTANCE, Domino, DominoMarker};
-use crate::pusher::{self, Pusher};
+use crate::pusher::Pusher;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use bevy_simple_subsecond_system::hot;
@@ -20,8 +20,8 @@ pub struct CurrentSimulation {
 #[derive(Component, Resource, Clone, Default)]
 struct Curve(Option<CubicCurve<Vec3>>);
 
-#[derive(Resource, Clone)]
-struct ControlPoints {
+#[derive(Resource, Clone, Default)]
+pub struct ControlPoints {
     points: Vec<Vec3>,
 }
 
@@ -31,8 +31,9 @@ impl Plugin for CurvePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Curve::default())
             .insert_resource(CurrentSimulation::default())
-            .add_systems(Startup, setup_curve)
-            .add_systems(FixedPreUpdate, animate_bump)
+            .insert_resource(ControlPoints::default())
+            .add_systems(PostStartup, setup_curve)
+            .add_systems(FixedUpdate, animate_bump)
             .add_systems(
                 Update,
                 (
@@ -47,17 +48,12 @@ impl Plugin for CurvePlugin {
 }
 
 #[hot]
-fn setup_curve(mut commands: Commands) {
-    // Starting data for [`ControlPoints`]:
-    let default_points = vec![Vec3::ZERO];
-
-    let default_control_data = ControlPoints {
-        points: default_points.into_iter().collect(),
-    };
-
-    let curve = form_curve(&default_control_data);
-    commands.insert_resource(curve);
-    commands.insert_resource(default_control_data)
+fn setup_curve(
+    mut control_points: ResMut<ControlPoints>,
+    transform: Single<&Transform, With<Pusher>>,
+) {
+    control_points.points.clear();
+    control_points.points.push(transform.translation);
 }
 
 #[hot]
@@ -103,8 +99,6 @@ fn form_curve(control_points: &ControlPoints) -> Curve {
 fn handle_click(
     mut commands: Commands,
     mut sim: ResMut<CurrentSimulation>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     cursor: Res<Cursor>,
     mut control_points: ResMut<ControlPoints>,
@@ -117,16 +111,7 @@ fn handle_click(
         pos.y = 1.7;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
             control_points.points[0] = pos;
-            commands.spawn((
-                Pusher,
-                RigidBody::Fixed,
-                Collider::ball(pusher::RADIUS),
-                Mesh3d(meshes.add(Sphere {
-                    radius: pusher::RADIUS,
-                })),
-                MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 1.0))),
-                Transform::from_translation(pos),
-            ));
+            // TODO: move pusher to pos
         } else {
             control_points.points.push(pos);
         }
@@ -159,6 +144,7 @@ fn handle_start_sim(
     mut sim: ResMut<CurrentSimulation>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<(Entity, &Transform), With<DominoMarker>>,
+    // mut transform: Single<&mut Transform, With<Pusher>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {

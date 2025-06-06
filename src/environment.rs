@@ -1,10 +1,28 @@
-use crate::floor::Floor;
+use crate::{
+    domino,
+    floor::Floor,
+    pusher::{self, Pusher},
+};
 use bevy::{
     asset::RenderAssetUsages,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 use bevy_rapier3d::prelude::*;
+
+const LIGHT_DISTANCE: f32 = 100.;
+const CAMERA_DISTANCE: f32 = 30.;
+const FLOOR_LENGTH: f32 = 40.;
+const FLOOR_HEIGHT: f32 = 1.;
+const FLOOR_SIZE: Vec3 = vec3(FLOOR_LENGTH, FLOOR_HEIGHT, FLOOR_LENGTH);
+const FLOOR_HALF_SIZE: Vec3 = vec3(FLOOR_SIZE.x * 0.5, FLOOR_SIZE.y * 0.5, FLOOR_SIZE.z * 0.5);
+const PUSHER_OFFSET: f32 = 0.875;
+pub const PUSHER_START_POS: Vec3 = vec3(
+    FLOOR_HALF_SIZE.x * PUSHER_OFFSET,
+    domino::DOMINO_HALF_SIZE.y * 1.5,
+    -FLOOR_HALF_SIZE.z * PUSHER_OFFSET,
+);
+
 pub struct EnvironmentPlugin;
 
 impl Plugin for EnvironmentPlugin {
@@ -19,13 +37,6 @@ fn setup_environment(
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let light_distance = 100.;
-    let camera_distance = 25.;
-    let floor_length = 100.;
-    let floor_height = 1.;
-    let floor_size = vec3(floor_length, floor_height, floor_length);
-    let floor_half_size = floor_size * 0.5;
-
     let debug_material = materials.add(StandardMaterial {
         base_color_texture: Some(images.add(uv_debug_texture())),
         ..default()
@@ -38,7 +49,7 @@ fn setup_environment(
             shadows_enabled: true,
             ..Default::default()
         },
-        Transform::from_xyz(-light_distance, light_distance * 0.5, light_distance).looking_at(
+        Transform::from_xyz(-LIGHT_DISTANCE, LIGHT_DISTANCE * 0.5, LIGHT_DISTANCE).looking_at(
             Vec3 {
                 x: 0.,
                 y: 0.,
@@ -51,10 +62,10 @@ fn setup_environment(
     commands.spawn((
         Name::new("Camera"),
         Camera3d::default(),
-        Transform::from_xyz(-camera_distance, camera_distance * 0.5, -camera_distance).looking_at(
+        Transform::from_xyz(-CAMERA_DISTANCE, CAMERA_DISTANCE * 0.5, -CAMERA_DISTANCE).looking_at(
             Vec3 {
                 x: 0.,
-                y: 0.,
+                y: -1.,
                 z: 0.,
             },
             Dir3::Y,
@@ -66,12 +77,23 @@ fn setup_environment(
         Floor,
         RigidBody::Fixed,
         Ccd::enabled(),
-        Collider::cuboid(floor_half_size.x, floor_half_size.y, floor_half_size.z),
-        Mesh3d(meshes.add(Cuboid::new(floor_size.x, floor_size.y, floor_size.z))),
+        Collider::cuboid(FLOOR_HALF_SIZE.x, FLOOR_HALF_SIZE.y, FLOOR_HALF_SIZE.z),
+        Mesh3d(meshes.add(Cuboid::new(FLOOR_SIZE.x, FLOOR_SIZE.y, FLOOR_SIZE.z))),
         MeshMaterial3d(debug_material.clone()),
         Transform::from_xyz(0., 0., 0.),
         Friction::new(1.),
-        Restitution::new(0.1),
+        Restitution::new(0.),
+    ));
+
+    commands.spawn((
+        Pusher,
+        RigidBody::Fixed,
+        Collider::ball(pusher::RADIUS),
+        Mesh3d(meshes.add(Sphere {
+            radius: pusher::RADIUS,
+        })),
+        MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 1.0))),
+        Transform::from_translation(PUSHER_START_POS),
     ));
 }
 
