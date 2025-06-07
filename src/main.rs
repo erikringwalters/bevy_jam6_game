@@ -3,12 +3,14 @@ mod curve;
 mod domino;
 mod environment;
 mod floor;
+mod goal;
 mod pusher;
 mod ui;
 
 use crate::cursor::*;
 use crate::curve::*;
 use crate::environment::*;
+use crate::goal::*;
 use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
 
 use bevy::prelude::*;
@@ -25,5 +27,6 @@ fn main() {
         .add_plugins(CursorPlugin)
         .add_plugins(CurvePlugin)
         .add_plugins(UIPlugin)
+        .add_plugins(GoalPlugin)
         .run();
 }

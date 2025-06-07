@@ -12,11 +12,11 @@ use bevy_rapier3d::prelude::*;
 
 const LIGHT_DISTANCE: f32 = 100.;
 const CAMERA_DISTANCE: f32 = 30.;
-const FLOOR_LENGTH: f32 = 40.;
-const FLOOR_HEIGHT: f32 = 1.;
-const FLOOR_SIZE: Vec3 = vec3(FLOOR_LENGTH, FLOOR_HEIGHT, FLOOR_LENGTH);
-const FLOOR_HALF_SIZE: Vec3 = vec3(FLOOR_SIZE.x * 0.5, FLOOR_SIZE.y * 0.5, FLOOR_SIZE.z * 0.5);
-const PUSHER_OFFSET: f32 = 0.875;
+pub const FLOOR_LENGTH: f32 = 40.;
+pub const FLOOR_HEIGHT: f32 = 1.;
+pub const FLOOR_SIZE: Vec3 = vec3(FLOOR_LENGTH, FLOOR_HEIGHT, FLOOR_LENGTH);
+pub const FLOOR_HALF_SIZE: Vec3 = vec3(FLOOR_SIZE.x * 0.5, FLOOR_SIZE.y * 0.5, FLOOR_SIZE.z * 0.5);
+pub const PUSHER_OFFSET: f32 = 0.875;
 pub const PUSHER_START_POS: Vec3 = vec3(
     FLOOR_HALF_SIZE.x * PUSHER_OFFSET,
     domino::DOMINO_SIZE.y,
