@@ -15,6 +15,7 @@ use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+use domino::DominoPlugin;
 use pusher::PusherPlugin;
 use ui::UIPlugin;
 fn main() {
@@ -23,6 +24,7 @@ fn main() {
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(SimpleSubsecondPlugin::default())
         .add_plugins(EnvironmentPlugin)
+        .add_plugins(DominoPlugin)
         .add_plugins(PusherPlugin)
         .add_plugins(CursorPlugin)
         .add_plugins(CurvePlugin)

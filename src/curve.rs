@@ -4,6 +4,7 @@ use crate::environment;
 use crate::pusher::Pusher;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+use bevy_rapier3d::rapier::prelude::CollisionEventFlags;
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Default, PartialEq, Debug)]
@@ -240,6 +241,9 @@ fn spawn_markers(
                         domino::DOMINO_HALF_SIZE.z,
                     ),
                     Sensor,
+                    CollidingEntities::default(),
+                    ActiveCollisionTypes::all(),
+                    ActiveEvents::COLLISION_EVENTS,
                     Mesh3d(meshes.add(Cuboid::from_size(domino::DOMINO_SIZE))),
                     MeshMaterial3d(materials.add(Color::srgba(0.2, 0.8, 0.2, 0.9))),
                     Transform::from_translation(pos).looking_at(last_pos, Dir3::Y),
