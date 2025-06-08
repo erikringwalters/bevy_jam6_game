@@ -11,7 +11,6 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 
 const LIGHT_DISTANCE: f32 = 100.;
-const CAMERA_DISTANCE: f32 = 30.;
 pub const FLOOR_LENGTH: f32 = 40.;
 pub const FLOOR_HEIGHT: f32 = 1.;
 pub const FLOOR_SIZE: Vec3 = vec3(FLOOR_LENGTH, FLOOR_HEIGHT, FLOOR_LENGTH);
@@ -53,19 +52,6 @@ fn setup_environment(
             Vec3 {
                 x: 0.,
                 y: 0.,
-                z: 0.,
-            },
-            Dir3::Y,
-        ),
-    ));
-
-    commands.spawn((
-        Name::new("Camera"),
-        Camera3d::default(),
-        Transform::from_xyz(-CAMERA_DISTANCE, CAMERA_DISTANCE * 0.5, -CAMERA_DISTANCE).looking_at(
-            Vec3 {
-                x: 0.,
-                y: -1.,
                 z: 0.,
             },
             Dir3::Y,

@@ -1,3 +1,4 @@
+mod camera;
 mod cursor;
 mod curve;
 mod domino;
@@ -8,6 +9,7 @@ mod level;
 mod pusher;
 mod ui;
 
+use crate::camera::*;
 use crate::cursor::*;
 use crate::curve::*;
 use crate::environment::*;
@@ -25,6 +27,7 @@ fn main() {
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(SimpleSubsecondPlugin::default())
         .add_plugins(EnvironmentPlugin)
+        .add_plugins(CameraPlugin)
         .add_plugins(DominoPlugin)
         .add_plugins(PusherPlugin)
         .add_plugins(CursorPlugin)
