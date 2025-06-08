@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::level::Win;
+use crate::level::*;
 
 pub struct UIPlugin;
 
@@ -25,8 +25,8 @@ fn display_instructions(mut commands: Commands) {
     ));
 }
 
-fn display_win(mut commands: Commands, win: Res<Win>) {
-    if win.status {
+fn display_win(mut commands: Commands, level: Res<Level>) {
+    if level.is_won {
         commands.spawn((
             Text::new("You Win!"),
             Node {

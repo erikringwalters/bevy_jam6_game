@@ -25,23 +25,32 @@ pub struct DominoMarker;
 #[derive(Component)]
 pub struct DominoSensor;
 
+#[derive(Resource, Debug, Default)]
+pub struct IsAllValid {
+    pub value: bool,
+}
+
 pub struct DominoPlugin;
 
 impl Plugin for DominoPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, detect_valid_markers);
+        app.insert_resource(IsAllValid::default())
+            .add_systems(Update, detect_valid_markers);
     }
 }
 
 fn detect_valid_markers(
     query: Query<(&CollidingEntities, &mut MeshMaterial3d<StandardMaterial>), With<DominoMarker>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut is_all_valid: ResMut<IsAllValid>,
 ) {
+    is_all_valid.value = true;
     for (colliding, material_handle) in query.iter() {
         if let Some(material) = materials.get_mut(material_handle) {
             material.base_color = if colliding.is_empty() {
                 VALID_COLOR
             } else {
+                is_all_valid.value = false;
                 INVALID_COLOR
             };
         }

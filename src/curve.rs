@@ -1,5 +1,7 @@
 use crate::cursor::Cursor;
-use crate::domino::{self, DOMINO_DISTANCE, Domino, DominoMarker, DominoSensor, VALID_COLOR};
+use crate::domino::{
+    self, DOMINO_DISTANCE, Domino, DominoMarker, DominoSensor, IsAllValid, VALID_COLOR,
+};
 use crate::environment;
 use crate::pusher::Pusher;
 use bevy::prelude::*;
@@ -150,8 +152,9 @@ fn handle_start_sim(
     mut query: Query<(Entity, &Transform), With<DominoMarker>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    is_all_valid: Res<IsAllValid>,
 ) {
-    if keyboard.just_pressed(KeyCode::Space) {
+    if keyboard.just_pressed(KeyCode::Space) && is_all_valid.value {
         for (marker, transform) in query.iter_mut() {
             let pos = transform.translation;
             let rot = transform.rotation;

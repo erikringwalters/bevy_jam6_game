@@ -1,7 +1,7 @@
 use crate::{
     curve::{CurrentSimulation, SimulationState},
     environment,
-    level::Win,
+    level::*,
 };
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::{
@@ -26,7 +26,7 @@ pub struct GoalPlugin;
 
 impl Plugin for GoalPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Win::default())
+        app.insert_resource(Level::default())
             .add_systems(Startup, setup_goal)
             .add_systems(Update, detect_dominos);
     }
@@ -36,7 +36,7 @@ fn setup_goal(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut win: ResMut<Win>,
+    mut level: ResMut<Level>,
 ) {
     commands.spawn((
         Name::new("Goal"),
@@ -50,23 +50,23 @@ fn setup_goal(
         MeshMaterial3d(materials.add(DEFAULT_COLOR)),
         Transform::from_translation(GOAL_START_POS),
     ));
-    win.status = false
+    level.is_won = false
 }
 
 fn detect_dominos(
     query: Query<(&CollidingEntities, &mut MeshMaterial3d<StandardMaterial>), With<Goal>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     sim: Res<CurrentSimulation>,
-    mut win: ResMut<Win>,
+    mut level: ResMut<Level>,
 ) {
     for (colliding, material_handle) in query.iter() {
         if let Some(material) = materials.get_mut(material_handle) {
             if colliding.is_empty() || sim.state != SimulationState::Physics {
                 material.base_color = DEFAULT_COLOR;
-                win.status = false
+                level.is_won = false
             } else {
                 material.base_color = WIN_COLOR;
-                win.status = true;
+                level.is_won = true;
             }
         }
     }
