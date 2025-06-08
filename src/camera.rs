@@ -24,7 +24,7 @@ impl Default for CameraSettings {
             // "sensible" results for this example. Adjust as required.
             orbit_distance: CAMERA_DISTANCE * 1.5,
             pitch_speed: 0.01,
-            pitch_range: -pitch_limit..pitch_limit,
+            pitch_range: -pitch_limit..0.,
             yaw_speed: 0.0075,
         }
     }
