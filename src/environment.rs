@@ -49,7 +49,7 @@ fn setup_environment(
             shadows_enabled: true,
             ..Default::default()
         },
-        Transform::from_xyz(-LIGHT_DISTANCE, LIGHT_DISTANCE * 0.5, LIGHT_DISTANCE).looking_at(
+        Transform::from_xyz(0., LIGHT_DISTANCE * 0.5, -LIGHT_DISTANCE).looking_at(
             Vec3 {
                 x: 0.,
                 y: 0.,
