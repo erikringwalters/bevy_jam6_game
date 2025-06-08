@@ -34,22 +34,16 @@ fn spawn_instructions(mut commands: Commands) {
 fn spawn_win_text(mut commands: Commands) {
     commands.spawn((
         WinText,
-        Text::new("You Win!"),
+        Text::new("You Win!\n\n(N)ext Level"),
         TextFont {
             font_size: 100.0,
             ..default()
         },
-        TextLayout::new_with_justify(JustifyText::Center),
         TextColor(Color::srgb(0., 0.8, 0.8)),
-        Visibility::Visible,
+        Visibility::Hidden,
+        TextLayout::new_with_justify(JustifyText::Center),
         Node {
-            // position_type: PositionType::Relative,
             top: Val::Percent(15.0),
-            left: Val::Percent(0.0),
-            // right: Val::Percent(0.0),
-            // align_self: AlignSelf::Center,
-            justify_content: JustifyContent::Center,
-            justify_items: JustifyItems::Center,
             justify_self: JustifySelf::Center,
             ..default()
         },
