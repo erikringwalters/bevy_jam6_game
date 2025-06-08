@@ -1,10 +1,9 @@
 use crate::cursor::Cursor;
-use crate::domino::{self, DOMINO_DISTANCE, Domino, DominoMarker};
+use crate::domino::{self, DOMINO_DISTANCE, Domino, DominoMarker, DominoSensor, VALID_COLOR};
 use crate::environment;
 use crate::pusher::Pusher;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use bevy_rapier3d::rapier::prelude::CollisionEventFlags;
 use bevy_simple_subsecond_system::hot;
 
 #[derive(Default, PartialEq, Debug)]
@@ -16,7 +15,7 @@ pub enum SimulationState {
 
 #[derive(Resource, Default, Debug)]
 pub struct CurrentSimulation {
-    state: SimulationState,
+    pub state: SimulationState,
 }
 
 #[derive(Component, Resource, Clone, Default)]
@@ -110,7 +109,7 @@ fn handle_click(
         sim.state = SimulationState::Draw;
         despawn_entities(&mut commands, query);
         let mut pos = cursor.position;
-        pos.y = 1.7;
+        pos.y = domino::DOMINO_Y_POS;
         if control_points.points.len() > 0 && control_points.points[0] == Vec3::ZERO {
             control_points.points[0] = pos;
         } else {
@@ -168,6 +167,17 @@ fn handle_start_sim(
                 Mesh3d(meshes.add(Cuboid::from_size(domino::DOMINO_SIZE))),
                 MeshMaterial3d(materials.add(Color::WHITE)),
                 Transform::from_translation(pos).with_rotation(rot),
+                Children::spawn(Spawn((
+                    Collider::cuboid(
+                        domino::DOMINO_HALF_SIZE.x,
+                        domino::DOMINO_HALF_SIZE.y,
+                        domino::DOMINO_HALF_SIZE.z,
+                    ),
+                    Sensor,
+                    DominoSensor,
+                    ActiveCollisionTypes::all(),
+                    ActiveEvents::COLLISION_EVENTS,
+                ))),
             ));
         }
         sim.state = SimulationState::Physics;
@@ -245,7 +255,7 @@ fn spawn_markers(
                     ActiveCollisionTypes::all(),
                     ActiveEvents::COLLISION_EVENTS,
                     Mesh3d(meshes.add(Cuboid::from_size(domino::DOMINO_SIZE))),
-                    MeshMaterial3d(materials.add(Color::srgba(0.2, 0.8, 0.2, 0.9))),
+                    MeshMaterial3d(materials.add(VALID_COLOR)),
                     Transform::from_translation(pos).looking_at(last_pos, Dir3::Y),
                 ));
                 next_dist += spacing;

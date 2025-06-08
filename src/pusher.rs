@@ -17,13 +17,11 @@ fn handle_reset_pusher(
     mut transform: Single<&mut Transform, With<Pusher>>,
     keyboard: Res<ButtonInput<KeyCode>>,
 ) {
-    // println!("{:?}", transform.translation);
     if keyboard.just_pressed(KeyCode::Space)
         || keyboard.just_pressed(KeyCode::KeyR)
         || keyboard.just_pressed(KeyCode::KeyZ)
         || keyboard.just_pressed(KeyCode::KeyC)
     {
         transform.translation = environment::PUSHER_START_POS;
-        println!("{:?}", transform.translation);
     }
 }
