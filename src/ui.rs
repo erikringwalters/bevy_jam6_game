@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 
+use crate::level::Win;
+
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, display_instructions);
+        app.add_systems(Startup, display_instructions)
+            .add_systems(Update, display_win);
     }
 }
 
@@ -20,4 +23,18 @@ fn display_instructions(mut commands: Commands) {
             ..default()
         },
     ));
+}
+
+fn display_win(mut commands: Commands, win: Res<Win>) {
+    if win.status {
+        commands.spawn((
+            Text::new("You Win!"),
+            Node {
+                position_type: PositionType::Absolute,
+                top: Val::Percent(15.0),
+                left: Val::Percent(50.0),
+                ..default()
+            },
+        ));
+    }
 }

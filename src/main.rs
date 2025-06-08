@@ -4,6 +4,7 @@ mod domino;
 mod environment;
 mod floor;
 mod goal;
+mod level;
 mod pusher;
 mod ui;
 

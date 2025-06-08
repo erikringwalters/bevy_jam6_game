@@ -1,6 +1,7 @@
 use crate::{
     curve::{CurrentSimulation, SimulationState},
     environment,
+    level::Win,
 };
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::{
@@ -25,7 +26,8 @@ pub struct GoalPlugin;
 
 impl Plugin for GoalPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_goal)
+        app.insert_resource(Win::default())
+            .add_systems(Startup, setup_goal)
             .add_systems(Update, detect_dominos);
     }
 }
@@ -34,6 +36,7 @@ fn setup_goal(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut win: ResMut<Win>,
 ) {
     commands.spawn((
         Name::new("Goal"),
@@ -47,26 +50,23 @@ fn setup_goal(
         MeshMaterial3d(materials.add(DEFAULT_COLOR)),
         Transform::from_translation(GOAL_START_POS),
     ));
+    win.status = false
 }
 
 fn detect_dominos(
-    query: Query<
-        (
-            &CollidingEntities,
-            // &DominoSensor,
-            &mut MeshMaterial3d<StandardMaterial>,
-        ),
-        With<Goal>,
-    >,
+    query: Query<(&CollidingEntities, &mut MeshMaterial3d<StandardMaterial>), With<Goal>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     sim: Res<CurrentSimulation>,
+    mut win: ResMut<Win>,
 ) {
     for (colliding, material_handle) in query.iter() {
         if let Some(material) = materials.get_mut(material_handle) {
-            material.base_color = if colliding.is_empty() || sim.state != SimulationState::Physics {
-                DEFAULT_COLOR
+            if colliding.is_empty() || sim.state != SimulationState::Physics {
+                material.base_color = DEFAULT_COLOR;
+                win.status = false
             } else {
-                WIN_COLOR
+                material.base_color = WIN_COLOR;
+                win.status = true;
             }
         }
     }
