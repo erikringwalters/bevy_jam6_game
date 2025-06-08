@@ -1,12 +1,15 @@
 use crate::cursor::Cursor;
 use crate::domino::{
-    self, DOMINO_DISTANCE, Domino, DominoMarker, DominoSensor, IsAllValid, VALID_COLOR,
+    self, DOMINO_DISTANCE, DOMINO_Y_POS, Domino, DominoMarker, DominoSensor, IsAllValid,
+    VALID_COLOR,
 };
-use crate::environment;
+use crate::environment::PUSHER_START_POS;
 use crate::pusher::Pusher;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use bevy_simple_subsecond_system::hot;
+
+pub const CONTROL_START_POS: Vec3 = vec3(PUSHER_START_POS.x, DOMINO_Y_POS, PUSHER_START_POS.z);
 
 #[derive(Default, PartialEq, Debug)]
 pub enum SimulationState {
@@ -51,12 +54,9 @@ impl Plugin for CurvePlugin {
 }
 
 #[hot]
-fn setup_curve(
-    mut control_points: ResMut<ControlPoints>,
-    transform: Single<&Transform, With<Pusher>>,
-) {
+fn setup_curve(mut control_points: ResMut<ControlPoints>) {
     control_points.points.clear();
-    control_points.points.push(transform.translation);
+    control_points.points.push(CONTROL_START_POS);
 }
 
 #[hot]
@@ -132,14 +132,14 @@ fn handle_undo(
         despawn_entities(&mut commands, query);
         control_points.points.pop();
         if control_points.points.is_empty() {
-            control_points.points.push(environment::PUSHER_START_POS);
+            control_points.points.push(CONTROL_START_POS);
         }
         sim.state = SimulationState::Draw;
     }
     if keyboard.just_pressed(KeyCode::KeyC) {
         despawn_entities(&mut commands, query);
         control_points.points.clear();
-        control_points.points.push(environment::PUSHER_START_POS);
+        control_points.points.push(CONTROL_START_POS);
         sim.state = SimulationState::Draw;
     }
 }

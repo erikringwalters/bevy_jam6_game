@@ -18,7 +18,7 @@ pub const FLOOR_HALF_SIZE: Vec3 = vec3(FLOOR_SIZE.x * 0.5, FLOOR_SIZE.y * 0.5, F
 pub const PUSHER_OFFSET: f32 = 0.875;
 pub const PUSHER_START_POS: Vec3 = vec3(
     FLOOR_HALF_SIZE.x * PUSHER_OFFSET,
-    domino::DOMINO_Y_POS,
+    domino::DOMINO_Y_POS + domino::DOMINO_HALF_SIZE.y * 0.5,
     -FLOOR_HALF_SIZE.z * PUSHER_OFFSET,
 );
 

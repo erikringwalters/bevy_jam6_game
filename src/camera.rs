@@ -1,3 +1,4 @@
+/// Mostly Pulled from Bevy's Camera Orbit Example
 use std::{f32::consts::FRAC_PI_2, ops::Range};
 
 use bevy::{input::mouse::AccumulatedMouseMotion, prelude::*};
@@ -65,7 +66,9 @@ fn handle_camera_movement(
     camera_settings: Res<CameraSettings>,
     mouse_motion: Res<AccumulatedMouseMotion>,
 ) {
-    if mouse_button_input.pressed(MouseButton::Right) {
+    if mouse_button_input.pressed(MouseButton::Right)
+        || mouse_button_input.pressed(MouseButton::Middle)
+    {
         let delta = mouse_motion.delta;
         // Mouse motion is one of the few inputs that should not be multiplied by delta time,
         // as we are already receiving the full movement since the last frame was rendered. Multiplying
