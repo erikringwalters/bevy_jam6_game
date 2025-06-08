@@ -4,6 +4,9 @@ use crate::level::*;
 
 pub struct UIPlugin;
 
+#[derive(Component)]
+pub struct WinText;
+
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, display_instructions)
@@ -21,20 +24,26 @@ fn display_instructions(mut commands: Commands) {
             top: Val::Px(12.0),
             left: Val::Px(12.0),
             ..default()
+        },   
+    ));     
+    commands.spawn((
+        Text::new("You Win!"),
+        WinText,
+        TextColor(Color::srgb(0., 0.8, 0.8)),
+        Visibility::Hidden,
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Percent(15.0),
+            left: Val::Percent(50.0),
+            ..default()
         },
     ));
 }
 
-fn display_win(mut commands: Commands, level: Res<Level>) {
+fn display_win(level: Res<Level>, mut vis: Single<&mut Visibility, With<WinText>>) {
     if level.is_won {
-        commands.spawn((
-            Text::new("You Win!"),
-            Node {
-                position_type: PositionType::Absolute,
-                top: Val::Percent(15.0),
-                left: Val::Percent(50.0),
-                ..default()
-            },
-        ));
+        **vis = Visibility::Visible;
+    } else {
+        **vis = Visibility::Hidden;
     }
 }
