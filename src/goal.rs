@@ -17,7 +17,7 @@ pub const GOAL_START_POS: Vec3 = vec3(
     environment::FLOOR_HALF_SIZE.z * environment::PUSHER_OFFSET,
 );
 const WIN_COLOR: Color = Color::srgba(0., 0.75, 0.75, 0.3);
-const DEFAULT_COLOR: Color = Color::srgba(0.7, 0.7, 0.2, 0.3);
+const DEFAULT_COLOR: Color = Color::srgba(0.9, 0.9, 0.7, 0.1);
 
 #[derive(Component)]
 pub struct Goal;

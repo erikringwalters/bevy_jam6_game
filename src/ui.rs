@@ -28,6 +28,17 @@ fn spawn_instructions(mut commands: Commands) {
             ..default()
         },
     ));
+    commands.spawn((
+        Text::new(
+            "Create a path to the goal!\n\nBe sure no markers are red\nor the physics won't start!",
+        ),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            right: Val::Px(12.0),
+            ..default()
+        },
+    ));
 }
 
 #[hot]
@@ -39,7 +50,7 @@ fn spawn_win_text(mut commands: Commands) {
             font_size: 100.0,
             ..default()
         },
-        TextColor(Color::srgb(0., 0.8, 0.8)),
+        TextColor(Color::srgb(0.5, 1., 1.)),
         Visibility::Hidden,
         TextLayout::new_with_justify(JustifyText::Center),
         Node {
