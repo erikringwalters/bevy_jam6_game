@@ -1,18 +1,19 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::Collider;
 use bevy_simple_subsecond_system::hot;
 
 use crate::{
     curve::{self, ControlPoints, CurrentSimulation},
     domino::{self, Domino},
-    environment,
+    environment::{self, FLOOR_HALF_SIZE},
 };
 
 pub const WALL_LENGTH_LONG: f32 = environment::FLOOR_LENGTH * 0.75;
 pub const WALL_LENGTH_MEDIUM: f32 = environment::FLOOR_LENGTH * 0.66;
 pub const WALL_LENGTH_SHORT: f32 = environment::FLOOR_LENGTH * 0.5;
-pub const WALL_THICKNESS: f32 = domino::DOMINO_DISTANCE * 2.;
-pub const WALL_HEIGHT: f32 = domino::DOMINO_SIZE.y;
-pub const WALL_COLOR: Color = Color::srgba(0.7, 0.7, 0.7, 1.);
+pub const WALL_THICKNESS: f32 = domino::DOMINO_DISTANCE;
+pub const WALL_HEIGHT: f32 = domino::DOMINO_SIZE.y * 0.9;
+pub const WALL_COLOR: Color = Color::srgb(0.3, 0.2, 0.1);
 
 #[derive(Resource, Default)]
 pub struct Level {
@@ -27,8 +28,8 @@ pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
-        // app.add_systems(Startup, initiate_level)
-        app.add_systems(Update, handle_next_level);
+        app.add_systems(Startup, initiate_level)
+            .add_systems(Update, handle_next_level);
     }
 }
 
@@ -39,12 +40,11 @@ fn handle_next_level(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut level: ResMut<Level>,
     control_points: ResMut<ControlPoints>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<StandardMaterial>>,
     sim: ResMut<CurrentSimulation>,
 ) {
     if level.is_won && keyboard.just_pressed(KeyCode::KeyN) {
-        println!("N pressed");
         curve::despawn_entities(&mut commands, query);
         curve::clear_curve(control_points, sim);
         level.is_won = false;
@@ -60,13 +60,70 @@ fn initiate_level(
     mut materials: ResMut<Assets<StandardMaterial>>,
     level: Res<Level>,
 ) {
+    let y_pos = environment::FLOOR_HALF_SIZE.y + WALL_HEIGHT * 0.5;
     match level.value {
-        0 => {}
+        0 => {
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    FLOOR_HALF_SIZE.x - WALL_LENGTH_LONG * 0.5,
+                    y_pos,
+                    -FLOOR_HALF_SIZE.z * 0.33,
+                ),
+            ));
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    -FLOOR_HALF_SIZE.x + WALL_LENGTH_LONG * 0.5,
+                    y_pos,
+                    FLOOR_HALF_SIZE.z * 0.33,
+                ),
+            ));
+        }
         1 => {
             commands.spawn((
                 Wall,
                 Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
                 MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    FLOOR_HALF_SIZE.x - WALL_LENGTH_LONG * 0.5,
+                    y_pos,
+                    -FLOOR_HALF_SIZE.z * 0.33,
+                ),
+            ));
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    -FLOOR_HALF_SIZE.x + WALL_LENGTH_LONG * 0.5,
+                    y_pos,
+                    FLOOR_HALF_SIZE.z * 0.33,
+                ),
             ));
         }
         2 => {}
