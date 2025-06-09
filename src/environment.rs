@@ -72,13 +72,14 @@ fn setup_environment(
     ));
 
     commands.spawn((
+        Name::new("Pusher"),
         Pusher,
         RigidBody::Fixed,
         Collider::ball(pusher::RADIUS),
         Mesh3d(meshes.add(Sphere {
             radius: pusher::RADIUS,
         })),
-        MeshMaterial3d(materials.add(Color::srgba(0.75, 0., 0.75, 1.0))),
+        MeshMaterial3d(materials.add(pusher::PUSHER_COLOR)),
         Transform::from_translation(PUSHER_START_POS),
     ));
 }

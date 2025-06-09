@@ -2,6 +2,7 @@ use crate::environment;
 use bevy::prelude::*;
 
 pub const RADIUS: f32 = 0.25;
+pub const PUSHER_COLOR: Color = Color::srgb(0., 0.75, 0.75);
 
 #[derive(Component)]
 pub struct Pusher;

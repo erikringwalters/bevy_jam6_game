@@ -1,6 +1,4 @@
-use std::f32::consts::PI;
-
-use bevy::{prelude::*, transform};
+use bevy::prelude::*;
 use bevy_rapier3d::prelude::Collider;
 use bevy_simple_subsecond_system::hot;
 
@@ -11,8 +9,7 @@ use crate::{
 };
 
 pub const WALL_LENGTH_LONG: f32 = environment::FLOOR_LENGTH * 0.75;
-pub const WALL_LENGTH_MEDIUM: f32 = environment::FLOOR_LENGTH * 0.66;
-pub const WALL_LENGTH_SHORT: f32 = environment::FLOOR_LENGTH * 0.5;
+pub const WALL_LENGTH_SHORT: f32 = environment::FLOOR_LENGTH * 0.4;
 pub const WALL_THICKNESS: f32 = domino::DOMINO_DISTANCE;
 pub const WALL_HEIGHT: f32 = domino::DOMINO_SIZE.y * 0.9;
 pub const WALL_COLOR: Color = Color::srgb(0.3, 0.2, 0.1);
@@ -67,6 +64,7 @@ fn initiate_level(
 ) {
     let y_pos = environment::FLOOR_HALF_SIZE.y + WALL_HEIGHT * 0.5;
     match level.value {
+        // There's probably a better way to do this but I'm running out of time
         0 => {}
         1 => {
             commands.spawn((
@@ -131,6 +129,121 @@ fn initiate_level(
                     y_pos,
                     FLOOR_HALF_SIZE.z * 0.33,
                 ),
+            ));
+        }
+        3 => {
+            // Long Walls
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    -FLOOR_HALF_SIZE.x * 0.66,
+                    y_pos,
+                    FLOOR_HALF_SIZE.z - WALL_LENGTH_LONG * 0.5,
+                )
+                .with_rotation(ROTATION_90Y),
+            ));
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    FLOOR_HALF_SIZE.x * 0.66,
+                    y_pos,
+                    -FLOOR_HALF_SIZE.z + WALL_LENGTH_LONG * 0.5,
+                )
+                .with_rotation(ROTATION_90Y),
+            ));
+
+            // Middle Wall
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_LONG, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_LONG * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(0., y_pos, 0.).with_rotation(ROTATION_90Y),
+            ));
+
+            // Short Walls
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_SHORT, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_SHORT * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    FLOOR_HALF_SIZE.x * 0.33,
+                    y_pos,
+                    -FLOOR_HALF_SIZE.z + WALL_LENGTH_SHORT * 0.5,
+                )
+                .with_rotation(ROTATION_90Y),
+            ));
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_SHORT, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_SHORT * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    FLOOR_HALF_SIZE.x * 0.33,
+                    y_pos,
+                    FLOOR_HALF_SIZE.z - WALL_LENGTH_SHORT * 0.5,
+                )
+                .with_rotation(ROTATION_90Y),
+            ));
+
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_SHORT, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_SHORT * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    -FLOOR_HALF_SIZE.x * 0.33,
+                    y_pos,
+                    -FLOOR_HALF_SIZE.z + WALL_LENGTH_SHORT * 0.5,
+                )
+                .with_rotation(ROTATION_90Y),
+            ));
+            commands.spawn((
+                Wall,
+                Mesh3d(meshes.add(Cuboid::new(WALL_LENGTH_SHORT, WALL_HEIGHT, WALL_THICKNESS))),
+                Collider::cuboid(
+                    WALL_LENGTH_SHORT * 0.5,
+                    WALL_HEIGHT * 0.5,
+                    WALL_THICKNESS * 0.5,
+                ),
+                MeshMaterial3d(materials.add(WALL_COLOR)),
+                Transform::from_xyz(
+                    -FLOOR_HALF_SIZE.x * 0.33,
+                    y_pos,
+                    FLOOR_HALF_SIZE.z - WALL_LENGTH_SHORT * 0.5,
+                )
+                .with_rotation(ROTATION_90Y),
             ));
         }
         _ => {}
