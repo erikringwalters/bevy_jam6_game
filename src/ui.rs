@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_simple_subsecond_system::hot;
+// use bevy_simple_subsecond_system::hot;
 
 use crate::level::*;
 
@@ -21,7 +21,7 @@ impl Plugin for UIPlugin {
     }
 }
 
-#[hot]
+// #[hot]
 fn spawn_instructions(mut commands: Commands) {
     commands.spawn((
         Text::new(
@@ -47,7 +47,7 @@ fn spawn_instructions(mut commands: Commands) {
     ));
 }
 
-#[hot]
+// #[hot]
 fn spawn_win_text(mut commands: Commands) {
     commands.spawn((
         WinText,
@@ -85,7 +85,7 @@ fn spawn_complete_text(mut commands: Commands) {
     ));
 }
 
-#[hot]
+// #[hot]
 fn display_win(level: Res<Level>, mut vis: Single<&mut Visibility, With<WinText>>) {
     **vis = if level.is_won && level.value <= 2 {
         Visibility::Visible
@@ -94,7 +94,7 @@ fn display_win(level: Res<Level>, mut vis: Single<&mut Visibility, With<WinText>
     }
 }
 
-#[hot]
+// #[hot]
 fn display_complete(level: Res<Level>, mut vis: Single<&mut Visibility, With<CompleteText>>) {
     **vis = if level.is_won && level.value > 2 {
         Visibility::Visible

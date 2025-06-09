@@ -7,7 +7,7 @@ use crate::environment::PUSHER_START_POS;
 use crate::pusher::Pusher;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use bevy_simple_subsecond_system::hot;
+// use bevy_simple_subsecond_system::hot;
 
 pub const CONTROL_START_POS: Vec3 = vec3(PUSHER_START_POS.x, DOMINO_Y_POS, PUSHER_START_POS.z);
 
@@ -53,13 +53,13 @@ impl Plugin for CurvePlugin {
     }
 }
 
-#[hot]
+// #[hot]
 fn setup_curve(mut control_points: ResMut<ControlPoints>) {
     control_points.points.clear();
     control_points.points.push(CONTROL_START_POS);
 }
 
-#[hot]
+// #[hot]
 fn update_curve(
     mut commands: Commands,
     meshes: ResMut<Assets<Mesh>>,
@@ -77,28 +77,28 @@ fn update_curve(
     spawn_markers(&mut commands, meshes, materials, curve.into());
 }
 
-#[hot]
-fn draw_curve(curve: Res<Curve>, mut gizmos: Gizmos) {
-    let Some(ref curve) = curve.0 else {
-        return;
-    };
-    // Scale resolution with curve length so it doesn't degrade as the length increases.
-    let resolution = 100 * curve.segments().len();
-    // println!("{:?}\n", curve.segments());
-    gizmos.linestrip(
-        curve.iter_positions(resolution).map(|pt| pt),
-        Color::srgba(1.0, 1.0, 1.0, 1.0),
-    );
-}
+// #[hot]
+// fn draw_curve(curve: Res<Curve>, mut gizmos: Gizmos) {
+//     let Some(ref curve) = curve.0 else {
+//         return;
+//     };
+//     // Scale resolution with curve length so it doesn't degrade as the length increases.
+//     let resolution = 100 * curve.segments().len();
+//     // println!("{:?}\n", curve.segments());
+//     gizmos.linestrip(
+//         curve.iter_positions(resolution).map(|pt| pt),
+//         Color::srgba(1.0, 1.0, 1.0, 1.0),
+//     );
+// }
 
-#[hot]
+// #[hot]
 fn form_curve(control_points: &ControlPoints) -> Curve {
     let points: Vec<Vec3> = control_points.points.iter().copied().collect();
     let spline = CubicCardinalSpline::new_catmull_rom(points);
     Curve(spline.to_curve().ok())
 }
 
-#[hot]
+// #[hot]
 fn handle_click(
     mut commands: Commands,
     mut sim: ResMut<CurrentSimulation>,
@@ -120,7 +120,7 @@ fn handle_click(
     }
 }
 
-#[hot]
+// #[hot]
 fn handle_undo(
     mut commands: Commands,
     mut sim: ResMut<CurrentSimulation>,
@@ -148,7 +148,7 @@ pub fn clear_curve(mut control_points: ResMut<ControlPoints>, mut sim: ResMut<Cu
     sim.state = SimulationState::Draw;
 }
 
-#[hot]
+// #[hot]
 fn handle_start_sim(
     mut commands: Commands,
     mut sim: ResMut<CurrentSimulation>,
@@ -191,7 +191,7 @@ fn handle_start_sim(
     }
 }
 
-#[hot]
+// #[hot]
 fn animate_bump(
     control_points: Res<ControlPoints>,
     sim: ResMut<CurrentSimulation>,
@@ -219,7 +219,7 @@ fn animate_bump(
     }
 }
 
-#[hot]
+// #[hot]
 fn spawn_markers(
     commands: &mut Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -272,7 +272,7 @@ fn spawn_markers(
     }
 }
 
-#[hot]
+// #[hot]
 pub fn despawn_entities<T: Component>(commands: &mut Commands, mut query: Query<Entity, With<T>>) {
     for marker in query.iter_mut() {
         commands.entity(marker).despawn();

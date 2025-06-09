@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 bevy = "0.16.1"
 bevy_rapier3d = "0.30.0"
-bevy_simple_subsecond_system = { git = "https://github.com/TheBevyFlock/bevy_simple_subsecond_system", version = "0.2" }
+# bevy_simple_subsecond_system = { git = "https://github.com/TheBevyFlock/bevy_simple_subsecond_system", version = "0.2" }
 
 [profile]
 
@@ -19,3 +19,7 @@ inherits = "dev"
 
 [profile.android-dev]
 inherits = "dev"
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.

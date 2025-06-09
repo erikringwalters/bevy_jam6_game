@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::Collider;
-use bevy_simple_subsecond_system::hot;
+// use bevy_simple_subsecond_system::hot;
 
 use crate::{
     curve::{self, ControlPoints, CurrentSimulation},
@@ -33,7 +33,7 @@ impl Plugin for LevelPlugin {
     }
 }
 
-#[hot]
+// #[hot]
 fn handle_next_level(
     mut commands: Commands,
     marker_query: Query<Entity, With<Domino>>,
@@ -55,7 +55,7 @@ fn handle_next_level(
     }
 }
 
-#[hot]
+// #[hot]
 fn initiate_level(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

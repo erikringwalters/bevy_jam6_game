@@ -1,6 +1,6 @@
 use crate::floor::Floor;
 use bevy::prelude::*;
-use bevy_simple_subsecond_system::hot;
+// use bevy_simple_subsecond_system::hot;
 
 #[derive(Resource, Default)]
 pub struct Cursor {
@@ -15,7 +15,7 @@ impl Plugin for CursorPlugin {
     }
 }
 
-#[hot]
+// #[hot]
 fn draw_cursor(
     camera_query: Single<(&Camera, &GlobalTransform)>,
     floor: Single<&GlobalTransform, With<Floor>>,
