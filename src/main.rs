@@ -19,6 +19,7 @@ use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use domino::DominoPlugin;
+use level::LevelPlugin;
 use pusher::PusherPlugin;
 use ui::UIPlugin;
 fn main() {
@@ -34,5 +35,6 @@ fn main() {
         .add_plugins(CurvePlugin)
         .add_plugins(UIPlugin)
         .add_plugins(GoalPlugin)
+        .add_plugins(LevelPlugin)
         .run();
 }

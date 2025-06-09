@@ -28,7 +28,7 @@ struct Curve(Option<CubicCurve<Vec3>>);
 
 #[derive(Resource, Clone, Default)]
 pub struct ControlPoints {
-    points: Vec<Vec3>,
+    pub points: Vec<Vec3>,
 }
 
 pub struct CurvePlugin;
@@ -138,10 +138,14 @@ fn handle_undo(
     }
     if keyboard.just_pressed(KeyCode::KeyC) {
         despawn_entities(&mut commands, query);
-        control_points.points.clear();
-        control_points.points.push(CONTROL_START_POS);
-        sim.state = SimulationState::Draw;
+        clear_curve(control_points, sim);
     }
+}
+
+pub fn clear_curve(mut control_points: ResMut<ControlPoints>, mut sim: ResMut<CurrentSimulation>) {
+    control_points.points.clear();
+    control_points.points.push(CONTROL_START_POS);
+    sim.state = SimulationState::Draw;
 }
 
 #[hot]
@@ -269,7 +273,7 @@ fn spawn_markers(
 }
 
 #[hot]
-fn despawn_entities<T: Component>(commands: &mut Commands, mut query: Query<Entity, With<T>>) {
+pub fn despawn_entities<T: Component>(commands: &mut Commands, mut query: Query<Entity, With<T>>) {
     for marker in query.iter_mut() {
         commands.entity(marker).despawn();
     }
