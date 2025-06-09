@@ -22,6 +22,7 @@ fn handle_reset_pusher(
         || keyboard.just_pressed(KeyCode::KeyR)
         || keyboard.just_pressed(KeyCode::KeyZ)
         || keyboard.just_pressed(KeyCode::KeyC)
+        || keyboard.just_pressed(KeyCode::KeyN)
     {
         transform.translation = environment::PUSHER_START_POS;
     }

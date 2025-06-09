@@ -8,10 +8,16 @@ pub struct UIPlugin;
 #[derive(Component)]
 pub struct WinText;
 
+#[derive(Component)]
+pub struct CompleteText;
+
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (spawn_instructions, spawn_win_text))
-            .add_systems(Update, display_win);
+        app.add_systems(
+            Startup,
+            (spawn_instructions, spawn_win_text, spawn_complete_text),
+        )
+        .add_systems(Update, (display_win, display_complete));
     }
 }
 
@@ -60,10 +66,37 @@ fn spawn_win_text(mut commands: Commands) {
         },
     ));
 }
+fn spawn_complete_text(mut commands: Commands) {
+    commands.spawn((
+        CompleteText,
+        Text::new("You Win!\nAll Levels Complete!\n\nPress N to enter Free Mode"),
+        TextFont {
+            font_size: 100.0,
+            ..default()
+        },
+        TextColor(Color::srgb(0.5, 1., 1.)),
+        Visibility::Hidden,
+        TextLayout::new_with_justify(JustifyText::Center),
+        Node {
+            top: Val::Percent(15.0),
+            justify_self: JustifySelf::Center,
+            ..default()
+        },
+    ));
+}
 
 #[hot]
 fn display_win(level: Res<Level>, mut vis: Single<&mut Visibility, With<WinText>>) {
-    **vis = if level.is_won {
+    **vis = if level.is_won && level.value <= 2 {
+        Visibility::Visible
+    } else {
+        Visibility::Hidden
+    }
+}
+
+#[hot]
+fn display_complete(level: Res<Level>, mut vis: Single<&mut Visibility, With<CompleteText>>) {
+    **vis = if level.is_won && level.value > 2 {
         Visibility::Visible
     } else {
         Visibility::Hidden
